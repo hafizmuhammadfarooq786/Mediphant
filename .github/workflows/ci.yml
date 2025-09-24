@@ -1,0 +1,188 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Lint and Type Check
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: web
+        run: npm run lint
+
+      - name: Run TypeScript check
+        working-directory: web
+        run: npx tsc --noEmit
+
+  # Run Tests
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Run tests
+        working-directory: web
+        run: npm test -- --coverage --watchAll=false
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: web/coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Build Application
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Build application
+        working-directory: web
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: web/.next/
+          retention-days: 1
+
+  # Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=web/package.json
+        continue-on-error: true
+
+      - name: Run npm audit
+        working-directory: web
+        run: npm audit --audit-level high
+        continue-on-error: true
+
+  # Retrieval System Check
+  retrieval-check:
+    name: Retrieval System Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: retrieval/package-lock.json
+
+      - name: Install retrieval dependencies
+        working-directory: retrieval
+        run: npm ci
+
+      - name: TypeScript check for retrieval
+        working-directory: retrieval
+        run: npx tsc --noEmit
+
+  # Deploy to Staging (only on main branch)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, retrieval-check]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+          path: web/.next/
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          echo "This would typically deploy to Vercel, AWS, or other hosting platform"
+          echo "Build artifacts are ready for deployment"
+
+  # Notify on Success/Failure
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test, build, security-scan, retrieval-check]
+    if: always()
+
+    steps:
+      - name: Notify success
+        if: ${{ needs.lint-and-typecheck.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success' }}
+        run: |
+          echo "✅ All checks passed! Pipeline completed successfully."
+
+      - name: Notify failure
+        if: ${{ needs.lint-and-typecheck.result == 'failure' || needs.test.result == 'failure' || needs.build.result == 'failure' }}
+        run: |
+          echo "❌ Pipeline failed. Check the logs for details."
+          exit 1

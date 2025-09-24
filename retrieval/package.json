@@ -1,0 +1,19 @@
+{
+  "name": "mediphant-retrieval",
+  "version": "1.0.0",
+  "description": "Medical corpus indexing and retrieval for Mediphant test",
+  "main": "index.ts",
+  "scripts": {
+    "test-connection": "tsx index.ts test",
+    "index-corpus": "tsx index.ts index"
+  },
+  "dependencies": {
+    "@pinecone-database/pinecone": "^6.1.2",
+    "openai": "^5.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}
