@@ -11,18 +11,19 @@ mediphant-devtest/
 ├── mobile/           # Swift/SwiftUI native integration
 ├── README.md         # This file
 ├── .env.example      # Environment variables template
-└── CLAUDE.md         # Project context and specifications
 ```
 
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - npm/yarn/pnpm
 - OpenAI API key (optional, fallback available)
 - Pinecone account (optional, fallback available)
 
 ### 1. Environment Setup
+
 ```bash
 # Copy environment template
 cp .env.example .env.local
@@ -34,6 +35,7 @@ cp .env.example .env.local
 ```
 
 ### 2. Web Application Setup
+
 ```bash
 cd web
 npm install
@@ -43,6 +45,7 @@ npm run dev
 Application will be available at `http://localhost:3000`
 
 ### 3. Vector Search Setup (Optional)
+
 ```bash
 cd retrieval
 npm install
@@ -57,6 +60,7 @@ npm run index-corpus
 ## Features
 
 ### Part A: Medication Interaction Checker
+
 - **Route**: `/interactions`
 - **API**: `POST /api/interactions`
 - **Features**:
@@ -69,11 +73,13 @@ npm run index-corpus
   - **Input Sanitization**: Character validation and length limits
 
 **Mock Interactions Supported:**
+
 - Warfarin + Ibuprofen → Bleeding risk
 - Metformin + Contrast dye → Lactic acidosis risk
 - Lisinopril + Spironolactone → Hyperkalemia risk
 
 ### Part B: FAQ Vector Search
+
 - **API**: `GET /api/faq?q=<query>`
 - **Features**:
   - Pinecone vector similarity search
@@ -83,6 +89,7 @@ npm run index-corpus
   - **Rate Limiting**: Consistent protection across all endpoints
 
 ### Part C: Native Mobile Integration
+
 - **File**: `mobile/swift/FaqView.swift`
 - **Features**:
   - SwiftUI interface with search functionality
@@ -98,6 +105,7 @@ npm run index-corpus
 **Rate Limit**: 100 requests/minute per IP
 
 **Request**:
+
 ```json
 {
   "medA": "warfarin",
@@ -106,6 +114,7 @@ npm run index-corpus
 ```
 
 **Response**:
+
 ```json
 {
   "pair": ["warfarin", "ibuprofen"],
@@ -126,6 +135,7 @@ npm run index-corpus
 **Clear History**: `DELETE /api/history`
 
 **Response**:
+
 ```json
 {
   "answer": "Medication adherence improves outcomes in diabetes...",
@@ -150,6 +160,7 @@ npm test:watch        # Watch mode
 ```
 
 **Test Coverage:**
+
 - Drug interaction detection (all mock pairs)
 - Case-insensitive matching
 - Enhanced input validation with Zod v4
@@ -161,6 +172,7 @@ npm test:watch        # Watch mode
 ## Development Commands
 
 ### Web Application
+
 ```bash
 cd web
 npm run dev          # Start development server (Turbopack enabled)
@@ -171,6 +183,7 @@ npm run test         # Run Jest tests
 ```
 
 ### Retrieval System
+
 ```bash
 cd retrieval
 npm run test-connection    # Test Pinecone connectivity
@@ -180,6 +193,7 @@ npm run index-corpus      # Index medical corpus to Pinecone
 ## Production Deployment
 
 ### Build Process
+
 ```bash
 cd web
 npm run build
@@ -187,6 +201,7 @@ npm run start
 ```
 
 ### Environment Variables
+
 ```bash
 # Required for full functionality
 OPENAI_API_KEY=sk-...
@@ -207,6 +222,7 @@ The Swift snippet (`mobile/swift/FaqView.swift`) demonstrates:
 5. **User Experience**: Loading states and result display
 
 **Usage**:
+
 ```swift
 import SwiftUI
 
@@ -220,17 +236,20 @@ struct ContentView: View {
 ## Technology Stack
 
 ### Frontend & Backend
+
 - **Next.js 15.5** - React framework with App Router
 - **TypeScript** - Type safety throughout
 - **Tailwind CSS** - Rapid UI development
 - **Zod v4** - Runtime validation with performance improvements
 
 ### External Services
+
 - **Pinecone v6.1.2** - Vector database for similarity search
 - **OpenAI v5.23.0** - Embeddings and text synthesis
 - **Jest** - Testing framework
 
 ### Mobile
+
 - **Swift/SwiftUI** - Native iOS integration
 - **URLSession** - HTTP networking
 - **Codable** - JSON serialization
@@ -238,6 +257,7 @@ struct ContentView: View {
 ## Project Metrics
 
 **Time Investment**: ~3.5 hours (Including Bonus Features)
+
 - Part A (Interactions): 75 minutes
 - Part B (FAQ Search): 55 minutes
 - Part C (Swift): 20 minutes
@@ -249,6 +269,7 @@ struct ContentView: View {
 - Setup & Documentation: 40 minutes
 
 **Code Quality**:
+
 - 13+ passing tests with comprehensive coverage
 - TypeScript strict mode enabled with Next.js 15.5
 - ESLint configuration for code quality
@@ -268,6 +289,7 @@ The application is designed to work even without external API access:
 ## 🏥 Safety & Compliance
 
 **Important Medical Disclaimers**:
+
 - All results labeled as "informational only"
 - Prominent warnings to consult healthcare professionals
 - No liability assumed for medical decisions
@@ -276,6 +298,7 @@ The application is designed to work even without external API access:
 ## 🎯 Bonus Features Implemented
 
 **Stretch Goals Completed** (+10 bonus points):
+
 1. ✅ **Recent Checks History**: In-memory query tracking with timestamps
 2. ✅ **DynamoDB Design**: Professional single-table design document
 3. ✅ **CI/CD Pipeline**: GitHub Actions with lint, test, build, and deploy
@@ -295,15 +318,15 @@ With additional time, next priorities would include:
 
 ## 🤝 AI Assistance Log
 
-**Tools Used**: Claude Code Assistant
-
 **AI-Generated Components**:
+
 - Boilerplate Next.js API routes (~30%)
 - SwiftUI view structure and networking (~40%)
 - TypeScript type definitions (~20%)
 - Test case structure and edge cases (~25%)
 
 **Human Review & Modifications**:
+
 - Business logic implementation and medical disclaimer content
 - API design decisions and error handling strategies
 - Testing strategy and validation approach
@@ -314,4 +337,4 @@ With additional time, next priorities would include:
 ---
 
 **Created for Mediphant Practical Test**
-*September 2024*
+_September 2024_
